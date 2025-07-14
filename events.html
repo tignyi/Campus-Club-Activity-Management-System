@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>活動瀏覽 - 校園社團活動管理系統</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+      min-height: 100vh;
+    }
+    .navbar {
+      background: #4f8cff;
+    }
+    .navbar-brand, .nav-link, .navbar-text {
+      color: #fff !important;
+    }
+    .event-card {
+      border-radius: 1rem;
+      box-shadow: 0 2px 12px rgba(79,140,255,0.08);
+      transition: transform 0.15s;
+    }
+    .event-card:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 4px 24px rgba(79,140,255,0.15);
+    }
+    .event-img {
+      border-radius: 1rem 1rem 0 0;
+      object-fit: cover;
+      height: 180px;
+      width: 100%;
+    }
+    .category-badge {
+      background: #e0e7ff;
+      color: #4f8cff;
+      font-size: 0.9em;
+      border-radius: 0.5rem;
+      padding: 0.2em 0.7em;
+      margin-right: 0.5em;
+    }
+    @media (max-width: 576px) {
+      .event-img { height: 120px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg mb-4">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="index.html"><i class="fa-solid fa-people-group me-2"></i>社團活動管理</a>
+      <span class="navbar-text ms-auto"><i class="fa-solid fa-user-circle me-1"></i>student</span>
+    </div>
+  </nav>
+  <div class="container">
+    <div class="row mb-4 align-items-center">
+      <div class="col-md-4 mb-2 mb-md-0">
+        <h2 class="fw-bold"><i class="fa-solid fa-calendar-days me-2 text-primary"></i>活動瀏覽</h2>
+      </div>
+      <div class="col-md-8 text-md-end">
+        <select class="form-select d-inline-block w-auto me-2" id="categoryFilter">
+          <option value="">所有分類</option>
+          <option value="社團講座">社團講座</option>
+          <option value="體育競賽">體育競賽</option>
+          <option value="藝文展演">藝文展演</option>
+        </select>
+        <input type="date" class="form-control d-inline-block w-auto" id="dateFilter">
+      </div>
+    </div>
+    <div class="row" id="eventsList">
+      <!-- 活動卡片將由 JS 動態產生 -->
+    </div>
+    <div id="noEvents" class="text-center text-muted mt-5" style="display:none;">
+      <i class="fa-solid fa-face-frown fa-2x mb-2"></i><br>查無符合條件的活動
+    </div>
+  </div>
+  <script>
+    // 假資料
+    const events = [
+      {
+        id: 1,
+        title: '社團迎新茶會',
+        category: '社團講座',
+        date: '2025-07-20',
+        organizer: '吉他社',
+        image: 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=400&q=80',
+        description: '歡迎新生加入吉他社，現場有精彩表演與抽獎活動！'
+      },
+      {
+        id: 2,
+        title: '校園籃球賽',
+        category: '體育競賽',
+        date: '2025-07-25',
+        organizer: '體育室',
+        image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80',
+        description: '全校性籃球競賽，歡迎各班組隊參加。'
+      },
+      {
+        id: 3,
+        title: '攝影展覽',
+        category: '藝文展演',
+        date: '2025-08-01',
+        organizer: '攝影社',
+        image: 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80',
+        description: '攝影社年度成果展，展出多位同學精彩作品。'
+      },
+      {
+        id: 4,
+        title: '桌遊同樂會',
+        category: '社團講座',
+        date: '2025-08-05',
+        organizer: '桌遊社',
+        image: 'https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=400&q=80',
+        description: '一起來玩桌遊，認識新朋友！'
+      },
+      {
+        id: 5,
+        title: '羽球友誼賽',
+        category: '體育競賽',
+        date: '2025-08-10',
+        organizer: '羽球社',
+        image: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=400&q=80',
+        description: '羽球社邀請各系同學參加友誼賽。'
+      },
+      {
+        id: 6,
+        title: '吉他彈唱夜',
+        category: '藝文展演',
+        date: '2025-08-12',
+        organizer: '吉他社',
+        image: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80',
+        description: '音樂饗宴，歡迎大家來聽歌！'
+      },
+      {
+        id: 7,
+        title: '程式設計馬拉松',
+        category: '社團講座',
+        date: '2025-08-15',
+        organizer: '資訊社',
+        image: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=400&q=80',
+        description: '24小時挑戰，團隊合作寫程式。'
+      },
+      {
+        id: 8,
+        title: '桌球比賽',
+        category: '體育競賽',
+        date: '2025-08-18',
+        organizer: '桌球社',
+        image: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=400&q=80',
+        description: '桌球社年度賽事，快來報名！'
+      },
+      {
+        id: 9,
+        title: '書法展覽',
+        category: '藝文展演',
+        date: '2025-08-20',
+        organizer: '書法社',
+        image: 'https://images.unsplash.com/photo-1465101178521-c1a9136a3c5c?auto=format&fit=crop&w=400&q=80',
+        description: '書法社作品展，感受傳統藝術之美。'
+      },
+      {
+        id: 10,
+        title: '社團博覽會',
+        category: '社團講座',
+        date: '2025-08-22',
+        organizer: '學務處',
+        image: 'https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=400&q=80',
+        description: '各大社團齊聚一堂，歡迎參觀。'
+      },
+      {
+        id: 11,
+        title: '排球賽',
+        category: '體育競賽',
+        date: '2025-08-25',
+        organizer: '排球社',
+        image: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=400&q=80',
+        description: '排球社邀請大家參加校內賽。'
+      },
+      {
+        id: 12,
+        title: '攝影外拍',
+        category: '藝文展演',
+        date: '2025-08-28',
+        organizer: '攝影社',
+        image: 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80',
+        description: '戶外攝影活動，歡迎新手參加。'
+      },
+      {
+        id: 13,
+        title: '桌遊競賽',
+        category: '社團講座',
+        date: '2025-09-01',
+        organizer: '桌遊社',
+        image: 'https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=400&q=80',
+        description: '桌遊社年度競賽，獎品豐富。'
+      },
+      {
+        id: 14,
+        title: '籃球三對三',
+        category: '體育競賽',
+        date: '2025-09-03',
+        organizer: '體育室',
+        image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80',
+        description: '三對三籃球賽，歡迎報名。'
+      },
+      {
+        id: 15,
+        title: '音樂會',
+        category: '藝文展演',
+        date: '2025-09-05',
+        organizer: '音樂社',
+        image: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80',
+        description: '音樂社年度音樂會，精彩演出。'
+      },
+      {
+        id: 16,
+        title: '社團幹部訓練',
+        category: '社團講座',
+        date: '2025-09-08',
+        organizer: '學務處',
+        image: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=400&q=80',
+        description: '提升幹部領導力與組織力。'
+      },
+      {
+        id: 17,
+        title: '羽球新手教學',
+        category: '體育競賽',
+        date: '2025-09-10',
+        organizer: '羽球社',
+        image: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=400&q=80',
+        description: '羽球社新手教學，免費參加。'
+      },
+      {
+        id: 18,
+        title: '書法體驗營',
+        category: '藝文展演',
+        date: '2025-09-12',
+        organizer: '書法社',
+        image: 'https://images.unsplash.com/photo-1465101178521-c1a9136a3c5c?auto=format&fit=crop&w=400&q=80',
+        description: '書法體驗，材料免費提供。'
+      },
+      {
+        id: 19,
+        title: '社團成果發表',
+        category: '社團講座',
+        date: '2025-09-15',
+        organizer: '學務處',
+        image: 'https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=400&q=80',
+        description: '各社團年度成果發表。'
+      },
+      {
+        id: 20,
+        title: '桌球新生盃',
+        category: '體育競賽',
+        date: '2025-09-18',
+        organizer: '桌球社',
+        image: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=400&q=80',
+        description: '新生專屬桌球比賽。'
+      },
+      {
+        id: 21,
+        title: '攝影比賽',
+        category: '藝文展演',
+        date: '2025-09-20',
+        organizer: '攝影社',
+        image: 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80',
+        description: '攝影社舉辦校園攝影比賽。'
+      },
+      {
+        id: 22,
+        title: '社團交流日',
+        category: '社團講座',
+        date: '2025-09-22',
+        organizer: '學務處',
+        image: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=400&q=80',
+        description: '各社團交流互動，增進情誼。'
+      }
+    ];
+    function renderEvents() {
+      const category = document.getElementById('categoryFilter').value;
+      const date = document.getElementById('dateFilter').value;
+      let filtered = events.filter(e => {
+        let match = true;
+        if (category && e.category !== category) match = false;
+        if (date && e.date !== date) match = false;
+        return match;
+      });
+      const list = document.getElementById('eventsList');
+      list.innerHTML = '';
+      if (filtered.length === 0) {
+        document.getElementById('noEvents').style.display = '';
+        return;
+      } else {
+        document.getElementById('noEvents').style.display = 'none';
+      }
+      filtered.forEach(e => {
+        list.innerHTML += `
+        <div class="col-md-4 mb-4">
+          <div class="card event-card h-100">
+            <img src="${e.image}" class="event-img" alt="${e.title}">
+            <div class="card-body">
+              <span class="category-badge"><i class="fa-solid fa-tag"></i> ${e.category}</span>
+              <span class="badge bg-light text-secondary ms-1"><i class="fa-solid fa-calendar-day"></i> ${e.date}</span>
+              <h5 class="card-title mt-2">${e.title}</h5>
+              <p class="card-text text-truncate">${e.description}</p>
+              <div class="d-flex justify-content-between align-items-center mt-3">
+                <span class="text-muted small"><i class="fa-solid fa-user-group me-1"></i>${e.organizer}</span>
+                <a href="event_detail.html?id=${e.id}" class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-circle-info me-1"></i>詳情</a>
+              </div>
+            </div>
+          </div>
+        </div>`;
+      });
+    }
+    document.getElementById('categoryFilter').addEventListener('change', renderEvents);
+    document.getElementById('dateFilter').addEventListener('change', renderEvents);
+    renderEvents();
+  </script>
+</body>
+</html>

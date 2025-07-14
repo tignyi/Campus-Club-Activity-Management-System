@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>活動審核 - 校園社團活動管理系統</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+      min-height: 100vh;
+    }
+    .navbar {
+      background: #4f8cff;
+    }
+    .navbar-brand, .nav-link, .navbar-text {
+      color: #fff !important;
+    }
+    .review-card {
+      border-radius: 1rem;
+      box-shadow: 0 2px 12px rgba(79,140,255,0.08);
+      background: #fff;
+      margin-bottom: 1.5rem;
+      padding: 1.5rem 1rem;
+    }
+    .status-badge {
+      font-size: 0.95em;
+      border-radius: 0.5rem;
+      padding: 0.2em 0.7em;
+      margin-right: 0.5em;
+    }
+    .status-0 { background: #f3f4f6; color: #6b7280; }
+    .status-1 { background: #fef9c3; color: #b45309; }
+    .status-2 { background: #bbf7d0; color: #15803d; }
+    .status-3 { background: #fee2e2; color: #dc2626; }
+    @media (max-width: 576px) {
+      .review-card { padding: 1rem 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg mb-4">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="index.html"><i class="fa-solid fa-people-group me-2"></i>社團活動管理</a>
+      <span class="navbar-text ms-auto"><i class="fa-solid fa-user-circle me-1"></i>admin</span>
+    </div>
+  </nav>
+  <div class="container">
+    <h2 class="fw-bold mb-4"><i class="fa-solid fa-clipboard-check me-2 text-primary"></i>活動審核</h2>
+    <div id="reviewList">
+      <!-- 活動審核卡片由 JS 動態產生 -->
+    </div>
+    <div id="noReview" class="text-center text-muted mt-5" style="display:none;">
+      <i class="fa-solid fa-face-frown fa-2x mb-2"></i><br>目前無待審核活動
+    </div>
+  </div>
+  <script>
+    // 假資料
+    let reviews = [
+      { id: 1, title: '社團迎新茶會', club: '吉他社', date: '2025-07-20', status: 1 },
+      { id: 2, title: '攝影展覽', club: '攝影社', date: '2025-08-01', status: 2 },
+      { id: 3, title: '桌遊同樂會', club: '桌遊社', date: '2025-08-05', status: 3 },
+      { id: 4, title: '社團博覽會', club: '學務處', date: '2025-08-22', status: 1 }
+    ];
+    const statusMap = {
+      0: { text: '草稿', cls: 'status-0' },
+      1: { text: '待審核', cls: 'status-1' },
+      2: { text: '通過', cls: 'status-2' },
+      3: { text: '駁回', cls: 'status-3' }
+    };
+    function renderReviews() {
+      const list = document.getElementById('reviewList');
+      list.innerHTML = '';
+      if (reviews.length === 0) {
+        document.getElementById('noReview').style.display = '';
+        return;
+      } else {
+        document.getElementById('noReview').style.display = 'none';
+      }
+      reviews.forEach(r => {
+        list.innerHTML += `
+          <div class="review-card mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <div class="fw-bold fs-5">${r.title}</div>
+              <span class="status-badge ${statusMap[r.status].cls}">${statusMap[r.status].text}</span>
+            </div>
+            <div class="mb-2 text-secondary small"><i class="fa-solid fa-user-group me-1"></i>${r.club}　<i class="fa-solid fa-calendar-day me-1"></i>${r.date}</div>
+            <div class="d-flex gap-2">
+              <button class="btn btn-outline-success btn-sm" onclick="approve(${r.id})" ${r.status!==1?'disabled':''}><i class="fa-solid fa-check"></i> 通過</button>
+              <button class="btn btn-outline-danger btn-sm" onclick="reject(${r.id})" ${r.status!==1?'disabled':''}><i class="fa-solid fa-xmark"></i> 駁回</button>
+            </div>
+          </div>
+        `;
+      });
+    }
+    window.approve = function(id) {
+      reviews = reviews.map(r => r.id === id ? { ...r, status: 2 } : r);
+      renderReviews();
+    }
+    window.reject = function(id) {
+      reviews = reviews.map(r => r.id === id ? { ...r, status: 3 } : r);
+      renderReviews();
+    }
+    renderReviews();
+  </script>
+</body>
+</html>

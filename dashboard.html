@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>系統統計 - 校園社團活動管理系統</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+      min-height: 100vh;
+    }
+    .navbar {
+      background: #4f8cff;
+    }
+    .navbar-brand, .nav-link, .navbar-text {
+      color: #fff !important;
+    }
+    .dashboard-card {
+      border-radius: 1rem;
+      box-shadow: 0 2px 12px rgba(79,140,255,0.08);
+      background: #fff;
+      margin-bottom: 2rem;
+      padding: 2rem 1.5rem;
+    }
+    @media (max-width: 576px) {
+      .dashboard-card { padding: 1rem 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg mb-4">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="index.html"><i class="fa-solid fa-people-group me-2"></i>社團活動管理</a>
+      <span class="navbar-text ms-auto"><i class="fa-solid fa-user-circle me-1"></i>admin</span>
+    </div>
+  </nav>
+  <div class="container">
+    <h2 class="fw-bold mb-4"><i class="fa-solid fa-chart-pie me-2 text-primary"></i>系統統計</h2>
+    <div class="row g-4">
+      <div class="col-md-6">
+        <div class="dashboard-card">
+          <h5 class="mb-3"><i class="fa-solid fa-chart-pie me-2 text-primary"></i>活動類型分布</h5>
+          <canvas id="pieChart" height="200"></canvas>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="dashboard-card">
+          <h5 class="mb-3"><i class="fa-solid fa-chart-column me-2 text-primary"></i>每月報名人次</h5>
+          <canvas id="barChart" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    // 假資料
+    const eventTypeData = {
+      labels: ['社團講座', '體育競賽', '藝文展演'],
+      data: [12, 8, 6]
+    };
+    const regMonthData = {
+      labels: ['3月', '4月', '5月', '6月', '7月', '8月'],
+      data: [30, 45, 38, 50, 60, 42]
+    };
+    // 圓餅圖
+    new Chart(document.getElementById('pieChart'), {
+      type: 'pie',
+      data: {
+        labels: eventTypeData.labels,
+        datasets: [{
+          data: eventTypeData.data,
+          backgroundColor: ['#4f8cff','#60a5fa','#818cf8']
+        }]
+      },
+      options: {
+        plugins: { legend: { position: 'bottom' } },
+        responsive: true
+      }
+    });
+    // 長條圖
+    new Chart(document.getElementById('barChart'), {
+      type: 'bar',
+      data: {
+        labels: regMonthData.labels,
+        datasets: [{
+          label: '報名人次',
+          data: regMonthData.data,
+          backgroundColor: '#4f8cff'
+        }]
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 10 } } },
+        responsive: true
+      }
+    });
+  </script>
+</body>
+</html>

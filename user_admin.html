@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>使用者管理 - 校園社團活動管理系統</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+      min-height: 100vh;
+    }
+    .navbar {
+      background: #4f8cff;
+    }
+    .navbar-brand, .nav-link, .navbar-text {
+      color: #fff !important;
+    }
+    .user-card {
+      border-radius: 1rem;
+      box-shadow: 0 2px 12px rgba(79,140,255,0.08);
+      margin-bottom: 1.2rem;
+      background: #fff;
+      transition: box-shadow 0.15s;
+    }
+    .user-card:hover {
+      box-shadow: 0 4px 24px rgba(79,140,255,0.15);
+    }
+    .user-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #e0e7ff;
+      margin-right: 1rem;
+    }
+    .role-badge {
+      font-size: 0.95em;
+      border-radius: 0.5rem;
+      padding: 0.2em 0.7em;
+      margin-right: 0.5em;
+    }
+    .role-student { background: #e0e7ff; color: #4f8cff; }
+    .role-staff { background: #fef9c3; color: #b45309; }
+    .role-admin { background: #fee2e2; color: #dc2626; }
+    @media (max-width: 576px) {
+      .user-avatar { width: 36px; height: 36px; margin-right: 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg mb-4">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="index.html"><i class="fa-solid fa-people-group me-2"></i>社團活動管理</a>
+      <span class="navbar-text ms-auto"><i class="fa-solid fa-user-circle me-1"></i>admin</span>
+    </div>
+  </nav>
+  <div class="container">
+    <h2 class="fw-bold mb-4"><i class="fa-solid fa-users-gear me-2 text-primary"></i>使用者管理</h2>
+    <div class="mb-3">
+      <select id="roleFilter" class="form-select w-auto d-inline-block">
+        <option value="">全部角色</option>
+        <option value="student">學生</option>
+        <option value="staff">職員</option>
+        <option value="admin">管理員</option>
+      </select>
+    </div>
+    <div id="usersList">
+      <!-- 使用者卡片由 JS 動態產生 -->
+    </div>
+    <div id="noUsers" class="text-center text-muted mt-5" style="display:none;">
+      <i class="fa-solid fa-face-frown fa-2x mb-2"></i><br>查無使用者
+    </div>
+  </div>
+  <script>
+    // 假資料
+    let users = [
+      { id: 1, name: '王小明', email: 'ming@school.edu', role: 'student', avatar: 'https://randomuser.me/api/portraits/men/1.jpg', status: 'active' },
+      { id: 2, name: '林美麗', email: 'mei@school.edu', role: 'staff', avatar: 'https://randomuser.me/api/portraits/women/2.jpg', status: 'active' },
+      { id: 3, name: '陳大仁', email: 'dan@school.edu', role: 'admin', avatar: 'https://randomuser.me/api/portraits/men/3.jpg', status: 'active' },
+      { id: 4, name: '張小華', email: 'hua@school.edu', role: 'student', avatar: 'https://randomuser.me/api/portraits/women/4.jpg', status: 'disabled' }
+    ];
+    function renderUsers() {
+      const filter = document.getElementById('roleFilter').value;
+      let filtered = users.filter(u => !filter || u.role === filter);
+      const list = document.getElementById('usersList');
+      list.innerHTML = '';
+      if (filtered.length === 0) {
+        document.getElementById('noUsers').style.display = '';
+        return;
+      } else {
+        document.getElementById('noUsers').style.display = 'none';
+      }
+      filtered.forEach(u => {
+        list.innerHTML += `
+          <div class="card user-card d-flex flex-row align-items-center p-3 mb-2">
+            <img src="${u.avatar}" class="user-avatar" alt="${u.name}">
+            <div class="flex-grow-1">
+              <div class="fw-bold mb-1">${u.name} <span class="role-badge role-${u.role}">${u.role === 'student' ? '學生' : u.role === 'staff' ? '職員' : '管理員'}</span></div>
+              <div class="text-secondary small mb-1"><i class="fa-solid fa-envelope me-1"></i>${u.email}</div>
+              <span class="badge ${u.status === 'active' ? 'bg-success' : 'bg-secondary'}">${u.status === 'active' ? '啟用中' : '已停權'}</span>
+            </div>
+            <div class="ms-3 d-flex flex-column gap-2">
+              <button class="btn btn-outline-danger btn-sm" onclick="disableUser(${u.id})" ${u.status === 'disabled' ? 'disabled' : ''}><i class="fa-solid fa-user-slash me-1"></i>停權</button>
+              <button class="btn btn-outline-success btn-sm" onclick="enableUser(${u.id})" ${u.status === 'active' ? 'disabled' : ''}><i class="fa-solid fa-user-check me-1"></i>啟用</button>
+              <button class="btn btn-outline-warning btn-sm" onclick="switchRole(${u.id})"><i class="fa-solid fa-user-gear me-1"></i>切換角色</button>
+              <button class="btn btn-outline-secondary btn-sm" onclick="deleteUser(${u.id})"><i class="fa-solid fa-trash me-1"></i>刪除</button>
+            </div>
+          </div>
+        `;
+      });
+    }
+    function disableUser(id) {
+      users = users.map(u => u.id === id ? { ...u, status: 'disabled' } : u);
+      renderUsers();
+    }
+    function enableUser(id) {
+      users = users.map(u => u.id === id ? { ...u, status: 'active' } : u);
+      renderUsers();
+    }
+    function switchRole(id) {
+      users = users.map(u => {
+        if (u.id === id) {
+          let next = u.role === 'student' ? 'staff' : u.role === 'staff' ? 'admin' : 'student';
+          return { ...u, role: next };
+        }
+        return u;
+      });
+      renderUsers();
+    }
+    function deleteUser(id) {
+      if (confirm('確定要刪除此使用者？')) {
+        users = users.filter(u => u.id !== id);
+        renderUsers();
+      }
+    }
+    document.getElementById('roleFilter').addEventListener('change', renderUsers);
+    renderUsers();
+  </script>
+</body>
+</html>

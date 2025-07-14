@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>活動管理 - 校園社團活動管理系統</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+      min-height: 100vh;
+    }
+    .navbar {
+      background: #4f8cff;
+    }
+    .navbar-brand, .nav-link, .navbar-text {
+      color: #fff !important;
+    }
+    .event-mng-card {
+      border-radius: 1rem;
+      box-shadow: 0 2px 12px rgba(79,140,255,0.08);
+      background: #fff;
+      margin-bottom: 1.5rem;
+      padding: 1.5rem 1rem;
+    }
+    .event-img {
+      border-radius: 1rem;
+      object-fit: cover;
+      width: 100px;
+      height: 80px;
+      background: #e0e7ff;
+      margin-right: 1rem;
+    }
+    @media (max-width: 576px) {
+      .event-img { width: 100%; height: 60px; margin-right: 0; margin-bottom: 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg mb-4">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="index.html"><i class="fa-solid fa-people-group me-2"></i>社團活動管理</a>
+      <span class="navbar-text ms-auto"><i class="fa-solid fa-user-circle me-1"></i>staff</span>
+    </div>
+  </nav>
+  <div class="container">
+    <h2 class="fw-bold mb-4"><i class="fa-solid fa-calendar-check me-2 text-primary"></i>活動管理</h2>
+    <div class="mb-3 text-end">
+      <button class="btn btn-primary" onclick="alert('僅示意，尚未開放新增')"><i class="fa-solid fa-plus me-1"></i>新增活動</button>
+    </div>
+    <div id="eventMngList">
+      <!-- 活動管理卡片由 JS 動態產生 -->
+    </div>
+    <div id="noEventMng" class="text-center text-muted mt-5" style="display:none;">
+      <i class="fa-solid fa-face-frown fa-2x mb-2"></i><br>目前無活動
+    </div>
+  </div>
+  <script>
+    // 假資料
+    let events = [
+      { id: 1, title: '社團迎新茶會', date: '2025-07-20', status: 1, image: 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, title: '攝影展覽', date: '2025-08-01', status: 2, image: 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, title: '桌遊同樂會', date: '2025-08-05', status: 0, image: 'https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=400&q=80' }
+    ];
+    const statusMap = {
+      0: { text: '草稿', cls: 'bg-secondary' },
+      1: { text: '待審核', cls: 'bg-warning text-dark' },
+      2: { text: '通過', cls: 'bg-success' },
+      3: { text: '駁回', cls: 'bg-danger' }
+    };
+    function renderEventMng() {
+      const list = document.getElementById('eventMngList');
+      list.innerHTML = '';
+      if (events.length === 0) {
+        document.getElementById('noEventMng').style.display = '';
+        return;
+      } else {
+        document.getElementById('noEventMng').style.display = 'none';
+      }
+      events.forEach(e => {
+        list.innerHTML += `
+          <div class="event-mng-card mb-3 d-flex align-items-center flex-wrap flex-md-nowrap">
+            <img src="${e.image}" class="event-img mb-2 mb-md-0" alt="${e.title}">
+            <div class="flex-grow-1">
+              <div class="fw-bold fs-5 mb-1">${e.title}</div>
+              <div class="text-secondary small mb-1"><i class="fa-solid fa-calendar-day me-1"></i>${e.date}</div>
+              <span class="badge ${statusMap[e.status].cls}">${statusMap[e.status].text}</span>
+            </div>
+            <div class="ms-md-3 mt-2 mt-md-0 d-flex flex-column gap-2">
+              <button class="btn btn-outline-primary btn-sm" onclick="alert('僅示意，尚未開放編輯')"><i class="fa-solid fa-pen-to-square me-1"></i>編輯</button>
+              <button class="btn btn-outline-danger btn-sm" onclick="deleteEvent(${e.id})"><i class="fa-solid fa-trash me-1"></i>刪除</button>
+            </div>
+          </div>
+        `;
+      });
+    }
+    window.deleteEvent = function(id) {
+      if (confirm('確定要刪除此活動？')) {
+        events = events.filter(e => e.id !== id);
+        renderEventMng();
+      }
+    }
+    renderEventMng();
+  </script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>投票專區 - 校園社團活動管理系統</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+      min-height: 100vh;
+    }
+    .navbar {
+      background: #4f8cff;
+    }
+    .navbar-brand, .nav-link, .navbar-text {
+      color: #fff !important;
+    }
+    .poll-card {
+      border-radius: 1rem;
+      box-shadow: 0 2px 12px rgba(79,140,255,0.08);
+      margin-bottom: 2rem;
+      background: #fff;
+    }
+    .poll-option {
+      background: #e0e7ff;
+      color: #4f8cff;
+      border-radius: 0.5rem;
+      padding: 0.5em 1em;
+      margin-bottom: 0.5em;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .poll-option.selected, .poll-option:hover {
+      background: #4f8cff;
+      color: #fff;
+    }
+    .poll-result-bar {
+      height: 1.2em;
+      border-radius: 0.5em;
+      background: #4f8cff;
+      margin-bottom: 0.5em;
+    }
+    @media (max-width: 576px) {
+      .poll-card { padding: 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg mb-4">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="index.html"><i class="fa-solid fa-people-group me-2"></i>社團活動管理</a>
+      <span class="navbar-text ms-auto"><i class="fa-solid fa-user-circle me-1"></i>student</span>
+    </div>
+  </nav>
+  <div class="container">
+    <h2 class="fw-bold mb-4"><i class="fa-solid fa-square-poll-vertical me-2 text-primary"></i>投票專區</h2>
+    <div class="card poll-card p-4 mb-4">
+      <h5 class="mb-3"><i class="fa-solid fa-bullhorn me-2 text-primary"></i>你最期待哪個社團活動？</h5>
+      <div id="pollOptions" class="mb-3">
+        <!-- 選項由 JS 動態產生 -->
+      </div>
+      <button id="voteBtn" class="btn btn-primary mb-2" disabled><i class="fa-solid fa-paper-plane me-1"></i>送出投票</button>
+      <div id="voteMsg"></div>
+      <div class="mt-4">
+        <canvas id="pollChart" height="120"></canvas>
+      </div>
+    </div>
+  </div>
+  <script>
+    // 假資料
+    const poll = {
+      question: '你最期待哪個社團活動？',
+      options: [
+        { id: 1, text: '社團迎新茶會', votes: 12 },
+        { id: 2, text: '校園籃球賽', votes: 8 },
+        { id: 3, text: '攝影展覽', votes: 5 },
+        { id: 4, text: '桌遊同樂會', votes: 3 }
+      ]
+    };
+    let selected = null;
+    let voted = false;
+    function renderOptions() {
+      const box = document.getElementById('pollOptions');
+      box.innerHTML = '';
+      poll.options.forEach(opt => {
+        const div = document.createElement('div');
+        div.className = 'poll-option' + (selected === opt.id ? ' selected' : '');
+        div.textContent = opt.text;
+        div.onclick = function() {
+          if (voted) return;
+          selected = opt.id;
+          renderOptions();
+          document.getElementById('voteBtn').disabled = false;
+        };
+        box.appendChild(div);
+      });
+    }
+    document.getElementById('voteBtn').onclick = function() {
+      if (selected && !voted) {
+        poll.options.find(o => o.id === selected).votes++;
+        voted = true;
+        document.getElementById('voteMsg').innerHTML = '<div class="alert alert-success">投票成功！</div>';
+        renderOptions();
+        renderChart();
+        document.getElementById('voteBtn').disabled = true;
+      }
+    };
+    function renderChart() {
+      const ctx = document.getElementById('pollChart').getContext('2d');
+      if (window.pollChart) window.pollChart.destroy();
+      window.pollChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: poll.options.map(o => o.text),
+          datasets: [{
+            label: '票數',
+            data: poll.options.map(o => o.votes),
+            backgroundColor: ['#4f8cff','#60a5fa','#818cf8','#a5b4fc']
+          }]
+        },
+        options: {
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
+          responsive: true,
+        }
+      });
+    }
+    renderOptions();
+    renderChart();
+  </script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>社團管理 - 校園社團活動管理系統</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+      min-height: 100vh;
+    }
+    .navbar {
+      background: #4f8cff;
+    }
+    .navbar-brand, .nav-link, .navbar-text {
+      color: #fff !important;
+    }
+    .club-card {
+      border-radius: 1rem;
+      box-shadow: 0 2px 12px rgba(79,140,255,0.08);
+      margin-bottom: 1.5rem;
+      background: #fff;
+      transition: box-shadow 0.15s;
+    }
+    .club-card:hover {
+      box-shadow: 0 4px 24px rgba(79,140,255,0.15);
+    }
+    .club-img {
+      border-radius: 1rem 0 0 1rem;
+      object-fit: cover;
+      width: 110px;
+      height: 110px;
+      background: #e0e7ff;
+    }
+    @media (max-width: 576px) {
+      .club-img { width: 100%; height: 80px; border-radius: 1rem 1rem 0 0; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg mb-4">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="index.html"><i class="fa-solid fa-people-group me-2"></i>社團活動管理</a>
+      <span class="navbar-text ms-auto"><i class="fa-solid fa-user-circle me-1"></i>student</span>
+    </div>
+  </nav>
+  <div class="container">
+    <h2 class="fw-bold mb-4"><i class="fa-solid fa-building-user me-2 text-primary"></i>社團管理</h2>
+    <div class="row" id="clubsList">
+      <!-- 社團卡片由 JS 動態產生 -->
+    </div>
+    <div id="noClubs" class="text-center text-muted mt-5" style="display:none;">
+      <i class="fa-solid fa-face-frown fa-2x mb-2"></i><br>目前尚無社團資料
+    </div>
+  </div>
+  <script>
+    // 假資料
+    const clubs = [
+      {
+        id: 1,
+        name: '吉他社',
+        leader: '王小明',
+        intro: '熱愛音樂、彈唱與表演，歡迎各路吉他好手加入！',
+        contact: 'guitar@school.edu',
+        image: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80'
+      },
+      {
+        id: 2,
+        name: '攝影社',
+        leader: '林美麗',
+        intro: '攝影外拍、展覽與技術交流，零基礎也能參加。',
+        contact: 'photo@school.edu',
+        image: 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80'
+      },
+      {
+        id: 3,
+        name: '桌遊社',
+        leader: '陳大仁',
+        intro: '桌遊同樂、競賽與新遊戲體驗，歡迎新朋友。',
+        contact: 'boardgame@school.edu',
+        image: 'https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=400&q=80'
+      }
+    ];
+    function renderClubs() {
+      const list = document.getElementById('clubsList');
+      list.innerHTML = '';
+      if (clubs.length === 0) {
+        document.getElementById('noClubs').style.display = '';
+        return;
+      } else {
+        document.getElementById('noClubs').style.display = 'none';
+      }
+      clubs.forEach(c => {
+        list.innerHTML += `
+          <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card club-card d-flex flex-row align-items-center p-3">
+              <img src="${c.image}" class="club-img me-3" alt="${c.name}">
+              <div class="flex-grow-1">
+                <h5 class="mb-1">${c.name}</h5>
+                <div class="text-muted small mb-1"><i class="fa-solid fa-user-tie me-1"></i>社長：${c.leader}</div>
+                <div class="mb-1">${c.intro}</div>
+                <div class="text-secondary small"><i class="fa-solid fa-envelope me-1"></i>${c.contact}</div>
+              </div>
+              <button class="btn btn-outline-primary ms-3" onclick="alert('僅示意，尚未開放編輯')"><i class="fa-solid fa-pen-to-square me-1"></i>編輯</button>
+            </div>
+          </div>
+        `;
+      });
+    }
+    renderClubs();
+  </script>
+</body>
+</html>
