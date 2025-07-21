@@ -1,11 +1,13 @@
 # 校園社團活動管理系統 - 功能開發優化清單
 
 ## 技術棧
-- 後端：Python（Flask/FastAPI，MySQL，hashlib，session/cookie）
+- 後端：Python（Flask）
+- API : restful api 
 - 前端：HTML5 + CSS3 + JavaScript（原生）+ Bootstrap（排版/元件）
-- 資料庫：MySQL
+- 資料庫：MongoDB
 - 圖表：Chart.js
 - 測試：Postman/curl
+- ODM :pymongo
 
 ---
 
