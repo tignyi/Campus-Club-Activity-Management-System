@@ -90,19 +90,33 @@
 
       if (!valid) return;
 
-      // 模擬送出（假資料判斷）
-      // 假設帳號 "testuser" 已存在
-      if (username.value === 'testuser') {
+      // 呼叫後端 API
+      fetch('http://localhost:5000/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: username.value,
+          email: email.value,
+          password: password.value
+        })
+      })
+      .then(res => res.json())
+      .then(result => {
+        resultMsg.classList.remove('d-none');
+        if (result.success) {
+          resultMsg.className = 'alert alert-success mt-3';
+          resultMsg.innerHTML = '註冊成功！3 秒後導向登入頁面...';
+          setTimeout(() => { window.location.href = 'login.html'; }, 3000);
+        } else {
+          resultMsg.className = 'alert alert-danger mt-3';
+          resultMsg.textContent = result.msg;
+        }
+      })
+      .catch(() => {
+        resultMsg.classList.remove('d-none');
         resultMsg.className = 'alert alert-danger mt-3';
-        resultMsg.textContent = '此帳號已被註冊，請更換其他帳號。';
-        resultMsg.classList.remove('d-none');
-      } else {
-        resultMsg.className = 'alert alert-success mt-3';
-        resultMsg.textContent = '註冊成功！請前往登入頁面。';
-        resultMsg.classList.remove('d-none');
-        // 清空表單
-        document.getElementById('registerForm').reset();
-      }
+        resultMsg.textContent = '伺服器連線失敗';
+      });
     });
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

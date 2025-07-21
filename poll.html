@@ -70,6 +70,9 @@
     </div>
   </div>
   <script>
+    const eventId = 'your-event-id'; // 實際使用時應從 URL 參數取得
+    const userId = 'your-user-id';   // 實際使用時應從登入狀態取得
+
     // 假資料
     const poll = {
       question: '你最期待哪個社團活動？',
@@ -128,8 +131,81 @@
         }
       });
     }
+
+    // 建立新投票
+    document.getElementById('createPollForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const title = document.getElementById('pollTitle').value;
+      const options = document.getElementById('pollOptions').value
+        .split('\n').filter(opt => opt.trim());
+      
+      if (!title || options.length < 2) {
+        alert('請輸入投票標題與至少兩個選項');
+        return;
+      }
+
+      fetch(`http://localhost:5000/api/event/${eventId}/poll`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, options })
+      })
+      .then(res => res.json())
+      .then(result => {
+        if (result.success) {
+          loadPolls();
+          document.getElementById('createPollForm').reset();
+        }
+      });
+    });
+
+    // 載入投票列表
+    function loadPolls() {
+      fetch(`http://localhost:5000/api/event/${eventId}/polls`)
+        .then(res => res.json())
+        .then(polls => {
+          document.getElementById('pollsList').innerHTML = polls.map(poll => `
+            <div class="poll-card p-4 mb-4">
+              <h5 class="mb-3">${poll.title}</h5>
+              <div class="poll-options">
+                ${poll.options.map(opt => `
+                  <div class="poll-option" onclick="vote('${poll._id}', '${opt.option_id}')">
+                    ${opt.text}
+                    <div class="progress mt-1" style="height: 4px;">
+                      <div class="progress-bar" style="width: ${(opt.votes/getTotalVotes(poll)*100)||0}%"></div>
+                    </div>
+                    <small class="text-muted">${opt.votes} 票</small>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `).join('');
+        });
+    }
+
+    // 投票
+    function vote(pollId, optionId) {
+      fetch(`http://localhost:5000/api/poll/${pollId}/vote`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ option_id: optionId })
+      })
+      .then(res => res.json())
+      .then(result => {
+        if (result.success) {
+          loadPolls();
+        }
+      });
+    }
+
+    // 計算總票數
+    function getTotalVotes(poll) {
+      return poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+    }
+
+    // 初始載入
     renderOptions();
     renderChart();
+    loadPolls();
   </script>
 </body>
 </html>

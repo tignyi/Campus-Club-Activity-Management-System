@@ -51,49 +51,74 @@
     </div>
   </div>
   <script>
-    // 假資料：已報名活動
-    const myRegs = [
-      {
-        id: 1,
-        title: '社團迎新茶會',
-        date: '2025-07-20',
-        organizer: '吉他社',
-        image: 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=400&q=80',
-        status: '已報名'
-      },
-      {
-        id: 5,
-        title: '羽球友誼賽',
-        date: '2025-08-10',
-        organizer: '羽球社',
-        image: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=400&q=80',
-        status: '已報名'
-      }
-    ];
-    function renderRegs() {
-      const list = document.getElementById('regList');
-      list.innerHTML = '';
-      if (myRegs.length === 0) {
-        document.getElementById('noReg').style.display = '';
-        return;
-      } else {
-        document.getElementById('noReg').style.display = 'none';
-      }
-      myRegs.forEach(e => {
-        list.innerHTML += `
-          <div class="card reg-card d-flex flex-row align-items-center p-3 mb-3">
-            <img src="${e.image}" class="reg-img me-3" alt="${e.title}">
-            <div class="flex-grow-1">
-              <h5 class="mb-1">${e.title}</h5>
-              <div class="text-muted small mb-1"><i class="fa-solid fa-calendar-day me-1"></i>${e.date}　<i class="fa-solid fa-user-group me-1"></i>${e.organizer}</div>
-              <span class="badge bg-success"><i class="fa-solid fa-check"></i> ${e.status}</span>
+    const userId = 'your-user-id'; // 實際使用時應從登入狀態取得
+
+    // 載入個人報名清單
+    function loadMyRegistrations() {
+      fetch(`http://localhost:5000/api/my_registrations?user_id=${userId}`)
+        .then(res => res.json())
+        .then(registrations => {
+          const regList = document.getElementById('regList');
+          const noReg = document.getElementById('noReg');
+          
+          if (registrations.length === 0) {
+            regList.innerHTML = '';
+            noReg.style.display = 'block';
+            return;
+          }
+          
+          noReg.style.display = 'none';
+          regList.innerHTML = registrations.map(reg => `
+            <div class="reg-card">
+              <div class="row g-0">
+                <div class="col-auto">
+                  <img src="${reg.event.image || 'https://via.placeholder.com/120x100'}" 
+                    class="reg-img" alt="${reg.event.title}">
+                </div>
+                <div class="col p-3">
+                  <h5 class="mb-1">${reg.event.title}</h5>
+                  <p class="text-muted small mb-2">
+                    <i class="fa-solid fa-calendar me-1"></i>${reg.event.date}<br>
+                    <i class="fa-solid fa-users me-1"></i>${reg.event.organizer}
+                  </p>
+                  <div class="d-flex gap-2">
+                    <a href="event_detail.html?id=${reg.event_id}" class="btn btn-outline-primary btn-sm">
+                      <i class="fa-solid fa-circle-info me-1"></i>詳情
+                    </a>
+                    <button class="btn btn-outline-danger btn-sm" onclick="cancelRegistration('${reg.event_id}')">
+                      <i class="fa-solid fa-xmark me-1"></i>取消報名
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
-            <a href="event_detail.html?id=${e.id}" class="btn btn-outline-primary ms-3"><i class="fa-solid fa-circle-info me-1"></i>詳情</a>
-          </div>
-        `;
+          `).join('');
+        })
+        .catch(() => {
+          document.getElementById('regList').innerHTML = 
+            '<div class="alert alert-danger">載入報名資料失敗</div>';
+        });
+    }
+
+    // 取消報名
+    function cancelRegistration(eventId) {
+      if (!confirm('確定要取消報名嗎？')) return;
+      
+      fetch(`http://localhost:5000/api/event/${eventId}/cancel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId })
+      })
+      .then(res => res.json())
+      .then(result => {
+        if (result.success) {
+          loadMyRegistrations();
+        }
       });
     }
-    renderRegs();
+
+    // 初始載入
+    loadMyRegistrations();
   </script>
 </body>
 </html>

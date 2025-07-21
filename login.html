@@ -57,13 +57,27 @@
         password.classList.remove('is-invalid');
       }
       if (!valid) return;
-      // 假登入驗證
-      if (username.value === 'student' && password.value === '123456') {
-        document.getElementById('loginMsg').innerHTML = '<div class="alert alert-success">登入成功，3 秒後導向首頁...</div>';
-        setTimeout(() => { window.location.href = 'events.html'; }, 3000);
-      } else {
-        document.getElementById('loginMsg').innerHTML = '<div class="alert alert-danger">帳號或密碼錯誤</div>';
-      }
+      // 呼叫後端 API
+      fetch('http://localhost:5000/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: username.value,
+          password: password.value
+        })
+      })
+      .then(res => res.json())
+      .then(result => {
+        if (result.success) {
+          document.getElementById('loginMsg').innerHTML = '<div class="alert alert-success">登入成功，3 秒後導向首頁...</div>';
+          setTimeout(() => { window.location.href = 'events.html'; }, 3000);
+        } else {
+          document.getElementById('loginMsg').innerHTML = `<div class="alert alert-danger">${result.msg}</div>`;
+        }
+      })
+      .catch(() => {
+        document.getElementById('loginMsg').innerHTML = '<div class="alert alert-danger">伺服器連線失敗</div>';
+      });
     });
   </script>
 </body>

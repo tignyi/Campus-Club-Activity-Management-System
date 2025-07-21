@@ -89,83 +89,137 @@
     </div>
   </div>
   <script>
-    // 假活動資料
-    const event = {
-      id: 1,
-      title: '社團迎新茶會',
-      category: '社團講座',
-      date: '2025-07-20',
-      organizer: '吉他社',
-      image: 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=700&q=80',
-      description: '歡迎新生加入吉他社，現場有精彩表演與抽獎活動！'
-    };
-    // 假留言資料
-    let comments = [
-      { user: '小明', avatar: 'https://randomuser.me/api/portraits/men/1.jpg', content: '請問需要自備樂器嗎？', time: '2025-07-10 14:20' },
-      { user: '社長', avatar: 'https://randomuser.me/api/portraits/men/2.jpg', content: '不用，現場有提供！', time: '2025-07-10 15:00' }
-    ];
-    let registered = false;
-    function renderEvent() {
-      document.getElementById('eventImg').src = event.image;
-      document.getElementById('eventCategory').innerHTML = `<i class='fa-solid fa-tag'></i> ${event.category}`;
-      document.getElementById('eventDate').innerHTML = `<i class='fa-solid fa-calendar-day'></i> ${event.date}`;
-      document.getElementById('eventTitle').textContent = event.title;
-      document.getElementById('eventOrganizer').textContent = event.organizer;
-      document.getElementById('eventDesc').textContent = event.description;
-      updateRegBtns();
+    // 取得活動 ID
+    const urlParams = new URLSearchParams(window.location.search);
+    const eventId = urlParams.get('id');
+    const userId = 'your-user-id'; // 實際使用時應從登入狀態取得
+
+    // 載入活動詳情
+    fetch(`http://localhost:5000/api/event/${eventId}`)
+      .then(res => res.json())
+      .then(event => {
+        if (!event.success) {
+          document.querySelector('.event-detail-card').innerHTML = 
+            '<div class="alert alert-danger m-3">找不到此活動</div>';
+          return;
+        }
+        document.getElementById('eventImg').src = event.image || 'https://via.placeholder.com/700x260';
+        document.getElementById('eventCategory').innerHTML = 
+          `<i class="fa-solid fa-tag me-1"></i>${event.category}`;
+        document.getElementById('eventDate').innerHTML = 
+          `<i class="fa-solid fa-calendar-day me-1"></i>${event.date}`;
+        document.getElementById('eventTitle').textContent = event.title;
+        document.getElementById('eventOrganizer').textContent = event.organizer;
+        document.getElementById('eventDesc').textContent = event.description;
+        
+        // 檢查報名狀態
+        checkRegistration();
+      })
+      .catch(() => {
+        document.querySelector('.event-detail-card').innerHTML = 
+          '<div class="alert alert-danger m-3">載入活動資料失敗</div>';
+      });
+
+    // 檢查報名狀態
+    function checkRegistration() {
+      fetch(`http://localhost:5000/api/event/${eventId}/registrations?user_id=${userId}`)
+        .then(res => res.json())
+        .then(result => {
+          const registerBtn = document.getElementById('registerBtn');
+          const cancelBtn = document.getElementById('cancelBtn');
+          if (result.length > 0) {
+            registerBtn.classList.add('d-none');
+            cancelBtn.classList.remove('d-none');
+          } else {
+            registerBtn.classList.remove('d-none');
+            cancelBtn.classList.add('d-none');
+          }
+        });
     }
-    function updateRegBtns() {
-      const regBtn = document.getElementById('registerBtn');
-      const cancelBtn = document.getElementById('cancelBtn');
-      const regStatus = document.getElementById('regStatus');
-      if (registered) {
-        regBtn.classList.add('d-none');
-        cancelBtn.classList.remove('d-none');
-        regStatus.innerHTML = '<span class="badge bg-success"><i class="fa-solid fa-check"></i> 已報名</span>';
-      } else {
-        regBtn.classList.remove('d-none');
-        cancelBtn.classList.add('d-none');
-        regStatus.innerHTML = '';
-      }
-    }
-    document.getElementById('registerBtn').onclick = function() {
-      registered = true;
-      updateRegBtns();
-    };
-    document.getElementById('cancelBtn').onclick = function() {
-      registered = false;
-      updateRegBtns();
-    };
-    function renderComments() {
-      const list = document.getElementById('commentsList');
-      list.innerHTML = '';
-      comments.forEach(c => {
-        list.innerHTML += `
-          <div class="d-flex align-items-start mb-3">
-            <img src="${c.avatar}" class="comment-avatar me-2" alt="avatar">
-            <div>
-              <div class="fw-bold">${c.user} <span class="text-muted small ms-2">${c.time}</span></div>
-              <div>${c.content}</div>
+
+    // 報名活動
+    document.getElementById('registerBtn').addEventListener('click', function() {
+      fetch(`http://localhost:5000/api/event/${eventId}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId })
+      })
+      .then(res => res.json())
+      .then(result => {
+        if (result.success) {
+          document.getElementById('regStatus').innerHTML = 
+            '<span class="text-success">報名成功！</span>';
+          checkRegistration();
+        } else {
+          document.getElementById('regStatus').innerHTML = 
+            `<span class="text-danger">${result.msg}</span>`;
+        }
+      });
+    });
+
+    // 取消報名
+    document.getElementById('cancelBtn').addEventListener('click', function() {
+      fetch(`http://localhost:5000/api/event/${eventId}/cancel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId })
+      })
+      .then(res => res.json())
+      .then(result => {
+        if (result.success) {
+          document.getElementById('regStatus').innerHTML = 
+            '<span class="text-success">已取消報名</span>';
+          checkRegistration();
+        }
+      });
+    });
+
+    // 載入留言
+    function loadComments() {
+      fetch(`http://localhost:5000/api/event/${eventId}/comments`)
+        .then(res => res.json())
+        .then(comments => {
+          document.getElementById('commentsList').innerHTML = comments.map(comment => `
+            <div class="d-flex gap-2 mb-3">
+              <img src="https://randomuser.me/api/portraits/men/${Math.floor(Math.random() * 50)}.jpg" 
+                class="comment-avatar" alt="avatar">
+              <div>
+                <div class="bg-light rounded-3 p-2">
+                  <strong>${comment.user_id}</strong><br>
+                  ${comment.content}
+                </div>
+                <small class="text-muted">${new Date(comment.created_at).toLocaleString()}</small>
+              </div>
             </div>
-          </div>
-        `;
-      });
+          `).join('');
+        });
     }
-    document.getElementById('commentForm').onsubmit = function(e) {
+
+    // 發送留言
+    document.getElementById('commentForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      const input = document.getElementById('commentInput');
-      if (!input.value.trim()) return;
-      comments.push({
-        user: 'student',
-        avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-        content: input.value,
-        time: new Date().toLocaleString('zh-TW', { hour12: false })
+      const content = document.getElementById('commentInput').value;
+      if (!content) return;
+
+      fetch(`http://localhost:5000/api/event/${eventId}/comment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: userId,
+          content: content
+        })
+      })
+      .then(res => res.json())
+      .then(result => {
+        if (result.success) {
+          document.getElementById('commentInput').value = '';
+          loadComments();
+        }
       });
-      input.value = '';
-      renderComments();
-    };
-    renderEvent();
-    renderComments();
+    });
+
+    // 初始載入留言
+    loadComments();
   </script>
 </body>
 </html>
