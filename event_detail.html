@@ -95,7 +95,7 @@
     const userId = 'your-user-id'; // 實際使用時應從登入狀態取得
 
     // 載入活動詳情
-    fetch(`http://localhost:5000/api/event/${eventId}`)
+    fetch(`http://127.0.0.1:5000/api/event/${eventId}`)
       .then(res => res.json())
       .then(event => {
         if (!event.success) {
@@ -122,7 +122,7 @@
 
     // 檢查報名狀態
     function checkRegistration() {
-      fetch(`http://localhost:5000/api/event/${eventId}/registrations?user_id=${userId}`)
+      fetch(`http://127.0.0.1:5000/api/event/${eventId}/registrations?user_id=${userId}`)
         .then(res => res.json())
         .then(result => {
           const registerBtn = document.getElementById('registerBtn');
@@ -139,7 +139,7 @@
 
     // 報名活動
     document.getElementById('registerBtn').addEventListener('click', function() {
-      fetch(`http://localhost:5000/api/event/${eventId}/register`, {
+      fetch(`http://127.0.0.1:5000/api/event/${eventId}/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId })
@@ -159,7 +159,7 @@
 
     // 取消報名
     document.getElementById('cancelBtn').addEventListener('click', function() {
-      fetch(`http://localhost:5000/api/event/${eventId}/cancel`, {
+      fetch(`http://127.0.0.1:5000/api/event/${eventId}/cancel`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId })
@@ -176,7 +176,7 @@
 
     // 載入留言
     function loadComments() {
-      fetch(`http://localhost:5000/api/event/${eventId}/comments`)
+      fetch(`http://127.0.0.1:5000/api/event/${eventId}/comments`)
         .then(res => res.json())
         .then(comments => {
           document.getElementById('commentsList').innerHTML = comments.map(comment => `
@@ -201,7 +201,7 @@
       const content = document.getElementById('commentInput').value;
       if (!content) return;
 
-      fetch(`http://localhost:5000/api/event/${eventId}/comment`, {
+      fetch(`http://127.0.0.1:5000/api/event/${eventId}/comment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -144,7 +144,7 @@
         return;
       }
 
-      fetch(`http://localhost:5000/api/event/${eventId}/poll`, {
+      fetch(`http://127.0.0.1:5000/api/event/${eventId}/poll`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, options })
@@ -160,7 +160,7 @@
 
     // 載入投票列表
     function loadPolls() {
-      fetch(`http://localhost:5000/api/event/${eventId}/polls`)
+      fetch(`http://127.0.0.1:5000/api/event/${eventId}/polls`)
         .then(res => res.json())
         .then(polls => {
           document.getElementById('pollsList').innerHTML = polls.map(poll => `
@@ -184,7 +184,7 @@
 
     // 投票
     function vote(pollId, optionId) {
-      fetch(`http://localhost:5000/api/poll/${pollId}/vote`, {
+      fetch(`http://127.0.0.1:5000/api/poll/${pollId}/vote`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ option_id: optionId })

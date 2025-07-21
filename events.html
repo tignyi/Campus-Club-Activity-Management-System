@@ -81,7 +81,7 @@
     const dateFilter = document.getElementById('dateFilter');
 
     // 載入分類選項
-    fetch('http://localhost:5000/api/categories')
+    fetch('http://127.0.0.1:5000/api/categories')
       .then(res => res.json())
       .then(categories => {
         categoryFilter.innerHTML = '<option value="">所有分類</option>' +
@@ -92,7 +92,7 @@
     function loadEvents() {
       const category = categoryFilter.value;
       const date = dateFilter.value;
-      let url = 'http://localhost:5000/api/events';
+      let url = 'http://127.0.0.1:5000/api/events';
       if (category || date) {
         url += '?';
         if (category) url += `category=${category}&`;

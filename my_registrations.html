@@ -55,7 +55,7 @@
 
     // 載入個人報名清單
     function loadMyRegistrations() {
-      fetch(`http://localhost:5000/api/my_registrations?user_id=${userId}`)
+      fetch(`http://127.0.0.1:5000/api/my_registrations?user_id=${userId}`)
         .then(res => res.json())
         .then(registrations => {
           const regList = document.getElementById('regList');
@@ -104,7 +104,7 @@
     function cancelRegistration(eventId) {
       if (!confirm('確定要取消報名嗎？')) return;
       
-      fetch(`http://localhost:5000/api/event/${eventId}/cancel`, {
+      fetch(`http://127.0.0.1:5000/api/event/${eventId}/cancel`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId })
